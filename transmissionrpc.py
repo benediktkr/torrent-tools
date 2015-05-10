@@ -12,7 +12,7 @@ URL="http://mathom:9091/transmission/rpc"
 username="transmission"
 password="transmission"
 logformat = '%(asctime)s %(levelname)s: %(message)s'
-logging.basicConfig(filename="rpc.log", level=logging.DEBUG, format=logformat)
+logging.basicConfig(filename="rpc.log", level=logging.INFO, format=logformat)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 class RPCError(Exception):
@@ -50,18 +50,17 @@ class TransmissionRPC(object):
         if r.status_code == 409:
             self.headers["X-Transmission-Session-Id"] = r.headers["X-Transmission-Session-Id"]
             r = requests.post(URL, data=request.json(), auth=self.auth, headers=self.headers)
-            return r
+        return r
 
     def rpc(self, method, **arguments):
         req = TransmRequest(method, **arguments)
         res = self.execute(req)
-        if res == None:
-            logging.info("Empty response after call to '{0}'".format(method))
-            return
         resp = TransmResponse.from_json(res.json())
         
         if not resp.result == "success":
             raise RPCError(resp.result)
+
+        return resp
         
 def is_episode(torrent):
     return guessit.guess_file_info(torrent["name"]).get("type").startswith("episode")
@@ -83,10 +82,9 @@ def remove_old(criteria):
 
 if __name__ == "__main__":
     import sys
-    if "--remove-old" in sys.argv:
-        if "--all" in sys.argv:
-            remove_old(is_old)
-        else:
-            remove_old(lambda t: is_old(t) and is_episode(t))
+    if "--all" in sys.argv:
+        remove_old(is_old)
+    else:
+        remove_old(lambda t: is_old(t) and is_episode(t))
         
         

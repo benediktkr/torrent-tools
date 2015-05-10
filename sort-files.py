@@ -7,37 +7,16 @@ import shutil
 import guessit 
 import logging
 
-"""
-TODO: 
- - Rename "watching" to "dump"
-"""
-
 logformat = '%(asctime)s %(levelname)s: %(message)s'
-logging.basicConfig(filename="rpc.log", level=logging.INFO, format=logformat)
+logging.basicConfig(filename="/tmp/torrentools-sorter.log", level=logging.INFO, format=logformat)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 shortwords = ["in", "of", "at", "the", "is"]
-videoextensions = [".avi", ".mkv", ".mp4"]
-subextensions = [".sub", ".srt", ".idx"]
-extensions = videoextensions + subextensions
 
-#root = {'tv': '/srv/media/newvideo/tv'}
 tvroot = '/srv/media/newvideo/tv/'
 transmissionroot = '/srv/media/watching'
 
-#print repr([a for a in list(os.environ) if a.startswith("TR_")])
-
 # -- Helpers
-def get_largest_file(dirname):
-    # Finding video file by size is more reliable than going by extensions
-    files = [a for a in os.listdir(dirname) if os.path.isfile(os.path.join(dirname, a))]
-    return max(files, key=lambda f: os.stat(os.path.join(dirname, f)).st_size)
-    
-def get_subs(dirname):
-    if not os.path.isdir(dirname):
-        return []
-    return filter(lambda x: os.path.splitext(x)[1].lower() in subextensions, os.listdir(dirname))
-
 def format_show_name(showname):
     name = showname.strip().split(" ")
     nametail = [b if b in shortwords else b.capitalize()
@@ -52,15 +31,14 @@ def walk_and_sort(path, move):
             try:
                 sort_file(os.path.join(directory[0], file), move=move)
             except ValueError as ex:
-                logging.info(str(ex))
+                logging.debug(str(ex))
 
 def transmission_complete(torrent_name):
     path = os.path.join(transmissionroot, torrent_name)
     if os.path.isdir(path):
-        videofile = get_largest_file(path)
-        sort_file(os.path.join(path, videofile), move=False)
-        for sub in get_subs(path):
-            sort_file(os.path.join(path, sub), move=False)
+        for file in os.dir(path):
+            sort_file(os.path.join(path, file), move=False)
+        #videofile = get_largest_file(path)
     else:
         sort_file(path, move=False)
 
@@ -94,8 +72,10 @@ def sort_file(filepath, move):
 
 def main():
     if "--walk" in sys.argv:
+        walk_and_sort(transmissionroot, "--move" in sys.argv)
+    elif "--walk-path" in sys.argv:
         path = sys.argv[2]
-        walk_and_sort(path, "--move" in sys.argv)
+        walk_and_sort(transmissionroot, "--move" in sys.argv)
     else:
         filename = os.environ["TR_TORRENT_NAME"]
         transmission_complete(filename)

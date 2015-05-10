@@ -1,0 +1,16 @@
+*.pyc
+*~
+*.log
+*development.db
+production.db
+keyfile*.txt
+servername*.txt
+\#*
+.\#*
+zone.txt
+config.py
+*/config.py
+dns/config.py
+record/config.py
+report/config.py
+site/config.py
