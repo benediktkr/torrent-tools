@@ -3,7 +3,7 @@
 import requests
 import json
 from requests.auth import HTTPBasicAuth
-import guessit
+
 
 class RPCError(Exception):
     pass
