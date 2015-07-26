@@ -1,4 +1,4 @@
-# torrent-tools
+# torrenttools
 
 This is a set of scripts I used to manage to my torrent client. It will
 
@@ -14,7 +14,7 @@ I use [flexget](http://flexget.com/) to download `.torrent` files, which transmi
 Cronjob:
 
 ```
-*/30 * * * * /usr/bin/python /path/to/transmission-tools.py --walk --remove-torrents > /dev/null
+*/30 * * * * /usr/bin/python /path/to/transmissiontools.py --walk --remove-torrents > /dev/null
 ```
 
 ## Disclaimer
