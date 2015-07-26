@@ -18,7 +18,7 @@ shortwords = ["in", "of", "at", "the", "is"]
 
 #-- Logger --
 logformat = '%(asctime)s %(levelname)s: %(message)s'
-logging.basicConfig(filename="/tmp/torrentools.log", level=logging.INFO, format=logformat)
+logging.basicConfig(filename="/var/lib/transmission-daemon/torrentools.log", level=logging.DEBUG, format=logformat)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 def format_show_name(showname):
@@ -69,25 +69,32 @@ def sort_file(filepath, move):
         logging.info("cp: {0} -> {1}".format(filepath, dst_path))
         shutil.copy2(filepath, dst_path)
 
-def remove_old(criteria):
+def remove_old():
     rpc = TransmissionRPC(URL, username, password)
     torrentlist = rpc.rpc("torrent-get", fields = ['name', 'id', 'doneDate', 'isFinished'])
 
-    fltr = filter(criteria, torrentlist["torrents"])
-    if len(fltr) == 0: return
-    
-    ids, names = [a["id"] for a in fltr], [a["name"] for a in fltr]
-    logging.info("Removing: " + ", ".join(names))
+    old_torrents = filter(is_old, torrentlist["torrents"])
 
-    rpc.rpc("torrent-remove", ids=ids, delete_local_data = True)
+    logging.debug("Old torrents: " + repr([a["name"] for a in old_torrents]))
+    
+    if len(old_torrents) == 0: return
+
+    for torrent in old_torrents:
+        isep = is_episode(torrent["name"])
+        if isep:
+            logging.info("Removing (rm): " + torrent["name"])
+        else:
+            logging.info("Removing: " + torrent["name"])
+
+        rpc.rpc("torrent-remove", ids=[torrent["id"]], delete_local_data = isep)
 
 if __name__ == "__main__":
     import sys
+    logging.debug("Starting " + " ".join(sys.argv))
+
     ## --remove-torrents
     if "--remove-torrents" in sys.argv:
-        remove_old(is_old)
-    elif "--remove-all-torrents" in sys.argv:
-        remove_old(lambda t: is_old(t) and is_episode(t))
+        remove_old()
 
     ## walk
     if "--walk" in sys.argv:

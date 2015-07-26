@@ -3,7 +3,7 @@
 This is a set of scripts I used to manage to my torrent client. It will
 
  * `--walk`: Walk your dump directory for new files. If it detects episodes, these will be moved to the collection, sorted by show name and season.
- * `--remove-torrents`: Removes finished torrents from transmission (those that have reached their seed limits)
+ * `--remove-torrents`: Removes finished torrents from transmission (those that have reached their seed limits). Will only delete local data for episodes. 
 
 The scripts are geared towards Transmission (and has a simple client for the Transmission RPC protocol). But file moving feature is client-agnostic and operates on files. The scripts use [guessit](https://github.com/wackou/guessit) to parse filenames, but only supports episodes as-it.
 
