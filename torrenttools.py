@@ -18,7 +18,7 @@ shortwords = ["in", "of", "at", "the", "is"]
 
 #-- Logger --
 logformat = '%(asctime)s %(levelname)s: %(message)s'
-logging.basicConfig(filename="/var/lib/transmission-daemon/torrentools.log", level=logging.DEBUG, format=logformat)
+logging.basicConfig(filename="/var/lib/transmission-daemon/torrentools.log", level=logging.INFO, format=logformat)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 def format_show_name(showname):
@@ -80,7 +80,7 @@ def remove_old():
     if len(old_torrents) == 0: return
 
     for torrent in old_torrents:
-        isep = is_episode(torrent["name"])
+        isep = is_episode(torrent)
         if isep:
             logging.info("Removing (rm): " + torrent["name"])
         else:
